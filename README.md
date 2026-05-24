@@ -1,17 +1,16 @@
 # Silver Potato
 
-A Vite + React + TypeScript starter for a mobile-first app experience.
+An Expo Go + React Native + TypeScript mobile app starter on Expo SDK 54.
 
 ## Scripts
 
-- `npm run dev` starts the local dev server.
-- `npm run dev:phone` starts Vite on your local network for phone testing with hot reload.
-- `npm run build` type-checks and builds for production.
-- `npm run lint` runs ESLint.
-- `npm run preview` previews the production build.
-- `npm run serve` serves the built app with Express on port `4173`.
-- `npm run serve:phone` builds the app, then serves it with Express on your local network.
+- `npm start` starts Expo for Expo Go.
+- `npm run start:lan` starts Expo on your local network.
+- `npm run start:tunnel` starts Expo through a tunnel when LAN is blocked.
+- `npm run android` starts Expo and opens the Android target.
+- `npm run ios` starts Expo and opens the iOS target.
+- `npm run web` opens the web target.
 
-## Phone testing
+## Expo Go
 
-Run `npm run dev:phone` for normal development, or `npm run serve:phone` to test the production build. Open the printed `Phone URL` on a phone connected to the same Wi-Fi network.
+Install Expo Go on your phone, run `npm run start:lan`, then scan the QR code printed in the terminal. If your phone and computer cannot see each other on Wi-Fi, use `npm run start:tunnel`.

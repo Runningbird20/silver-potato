@@ -5,17 +5,26 @@
 /.pnp
 .pnp.js
 
+# Expo
+/.expo
+/dist
+/web-build
+expo-env.d.ts
+
+# Native
+/.kotlin
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
 # testing
 /coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-/dist
-/dist-ssr
 
 # misc
 .DS_Store
@@ -34,12 +43,8 @@ lerna-debug.log*
 .env*.local
 .env
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 
 # editor
 .vscode/*
@@ -50,3 +55,7 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+# generated native folders
+/ios
+/android
