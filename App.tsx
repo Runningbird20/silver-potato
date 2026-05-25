@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 
 import { AuthUser, mockAuth } from './src/auth/mockAuth';
+import { OnboardingFlow } from './src/onboarding/OnboardingFlow';
+import { getOnboardingProgress } from './src/onboarding/onboardingStorage';
 
 const tasks = [
   { title: 'Morning review', time: '8:30 AM', tone: '#D6F5DF' },
@@ -32,6 +34,9 @@ type AuthMode = 'login' | 'signup';
 export default function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<
+    boolean | null
+  >(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -48,6 +53,26 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!user) {
+      setHasCompletedOnboarding(null);
+      return;
+    }
+
+    setHasCompletedOnboarding(null);
+    getOnboardingProgress(user.id).then((progress) => {
+      if (isMounted) {
+        setHasCompletedOnboarding(progress?.completed ?? false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
   async function handleLogout() {
     await mockAuth.signOut();
     setUser(null);
@@ -59,6 +84,19 @@ export default function App() {
 
   if (!user) {
     return <AuthScreen onAuthenticated={setUser} />;
+  }
+
+  if (hasCompletedOnboarding === null) {
+    return <LoadingScreen />;
+  }
+
+  if (!hasCompletedOnboarding) {
+    return (
+      <OnboardingFlow
+        onComplete={() => setHasCompletedOnboarding(true)}
+        user={user}
+      />
+    );
   }
 
   return <MainApp user={user} onLogout={handleLogout} />;
@@ -199,7 +237,7 @@ function AuthScreen({
               <TextInput
                 autoCapitalize="none"
                 onChangeText={setPassword}
-                placeholder="••••••••••"
+                placeholder="Password"
                 placeholderTextColor="#8E939F"
                 secureTextEntry
                 style={styles.input}
@@ -379,7 +417,7 @@ const styles = StyleSheet.create({
   segmentedControl: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderColor: 'rgba(255, 255, 255, 0.12)',
-    borderRadius: 26,
+    borderRadius: 999,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 6,
@@ -387,7 +425,7 @@ const styles = StyleSheet.create({
   },
   segment: {
     alignItems: 'center',
-    borderRadius: 22,
+    borderRadius: 999,
     flex: 1,
     justifyContent: 'center',
     minHeight: 54,
@@ -422,7 +460,7 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 24,
+    borderRadius: 999,
     borderWidth: 1,
     color: '#F7F8FB',
     fontSize: 16,
@@ -432,7 +470,7 @@ const styles = StyleSheet.create({
   errorBox: {
     backgroundColor: 'rgba(255, 92, 92, 0.14)',
     borderColor: 'rgba(255, 139, 139, 0.32)',
-    borderRadius: 18,
+    borderRadius: 24,
     borderWidth: 1,
     padding: 12,
   },
@@ -444,7 +482,7 @@ const styles = StyleSheet.create({
   fullWidthButton: {
     alignItems: 'center',
     backgroundColor: '#E8FF1A',
-    borderRadius: 22,
+    borderRadius: 999,
     elevation: 3,
     justifyContent: 'center',
     marginTop: 8,
@@ -497,7 +535,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FDFCF8',
     borderColor: '#EEE9DE',
-    borderRadius: 18,
+    borderRadius: 999,
     borderWidth: 1,
     elevation: 2,
     justifyContent: 'center',
@@ -541,7 +579,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     backgroundColor: '#B7F0C1',
-    borderRadius: 18,
+    borderRadius: 999,
     justifyContent: 'center',
     minHeight: 44,
     paddingHorizontal: 18,
@@ -594,7 +632,7 @@ const styles = StyleSheet.create({
   secondaryButton: {
     alignItems: 'center',
     backgroundColor: '#E2F3E9',
-    borderRadius: 16,
+    borderRadius: 999,
     justifyContent: 'center',
     minHeight: 42,
     paddingHorizontal: 14,
