@@ -521,7 +521,7 @@ function TextField({
   );
 }
 
-function ProfileSelectorCard({
+export function ProfileSelectorCard({
   label,
   value,
   meta,
@@ -550,7 +550,7 @@ function ProfileSelectorCard({
   );
 }
 
-function WheelPickerSheet({
+export function WheelPickerSheet({
   visible,
   title,
   value,
@@ -811,7 +811,7 @@ function WheelColumn({
   );
 }
 
-function UnitToggle<TValue extends string>({
+export function UnitToggle<TValue extends string>({
   options,
   selected,
   onSelect,
@@ -947,7 +947,7 @@ function validateStep(step: number, data: OnboardingData) {
   return '';
 }
 
-function createNumberOptions(
+export function createNumberOptions(
   start: number,
   end: number,
   suffix = '',
@@ -969,7 +969,7 @@ function createDayOptions() {
   });
 }
 
-function createHeightOptions(startInches: number, endInches: number) {
+export function createHeightOptions(startInches: number, endInches: number) {
   const options = [];
 
   for (let inches = startInches; inches <= endInches; inches += 1) {
@@ -981,7 +981,7 @@ function createHeightOptions(startInches: number, endInches: number) {
   return options;
 }
 
-function heightLabelToInches(height: string) {
+export function heightLabelToInches(height: string) {
   const match = height.match(/(\d+)'(\d+)"/);
 
   if (!match) {
@@ -991,12 +991,12 @@ function heightLabelToInches(height: string) {
   return Number(match[1]) * 12 + Number(match[2]);
 }
 
-function cmLabelToInches(height: string) {
+export function cmLabelToInches(height: string) {
   const cm = Number(height.replace(/[^\d.]/g, '')) || 178;
   return Math.round(cm / 2.54);
 }
 
-function inchesToFtInLabel(inches: number) {
+export function inchesToFtInLabel(inches: number) {
   const boundedInches = Math.min(90, Math.max(48, Math.round(inches)));
   const feet = Math.floor(boundedInches / 12);
   const remainingInches = boundedInches % 12;
@@ -1004,25 +1004,25 @@ function inchesToFtInLabel(inches: number) {
   return `${feet}'${remainingInches}"`;
 }
 
-function inchesToCmLabel(inches: number) {
+export function inchesToCmLabel(inches: number) {
   const cm = Math.min(229, Math.max(122, Math.round(inches * 2.54)));
   return `${cm} cm`;
 }
 
-function weightLabelToLb(weight: string) {
+export function weightLabelToLb(weight: string) {
   return Number(weight.replace(/[^\d.]/g, '')) || 180;
 }
 
-function weightLabelToKg(weight: string) {
+export function weightLabelToKg(weight: string) {
   return Number(weight.replace(/[^\d.]/g, '')) || 82;
 }
 
-function lbToKgLabel(lb: number) {
+export function lbToKgLabel(lb: number) {
   const kg = Math.min(204, Math.max(32, Math.round(lb / 2.20462)));
   return `${kg} kg`;
 }
 
-function kgToLbLabel(kg: number) {
+export function kgToLbLabel(kg: number) {
   const lb = Math.min(450, Math.max(70, Math.round(kg * 2.20462)));
   return `${lb} lb`;
 }

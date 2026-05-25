@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,6 +17,7 @@ import {
 import { AuthUser, mockAuth } from './src/auth/mockAuth';
 import { OnboardingFlow } from './src/onboarding/OnboardingFlow';
 import { getOnboardingProgress } from './src/onboarding/onboardingStorage';
+import { SettingsScreen } from './src/settings/SettingsScreen';
 
 const tasks = [
   { title: 'Morning review', time: '8:30 AM', tone: '#D6F5DF' },
@@ -283,81 +285,126 @@ function MainApp({
   user: AuthUser;
   onLogout: () => void;
 }) {
+  const [activeTab, setActiveTab] = useState<'home' | 'plan' | 'settings'>(
+    'home',
+  );
+  const [settingsDirty, setSettingsDirty] = useState(false);
+  const isSettings = activeTab === 'settings';
+
+  function handleTabPress(nextTab: 'home' | 'plan' | 'settings') {
+    if (activeTab === 'settings' && settingsDirty && nextTab !== 'settings') {
+      Alert.alert(
+        'Unsaved changes',
+        'Leave settings without saving your changes?',
+        [
+          { text: 'Stay', style: 'cancel' },
+          {
+            text: 'Leave',
+            style: 'destructive',
+            onPress: () => {
+              setSettingsDirty(false);
+              setActiveTab(nextTab);
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    setActiveTab(nextTab);
+  }
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.topBar}>
-          <View>
-            <Text style={styles.eyebrow}>Today</Text>
-            <Text style={styles.title}>Silver Potato</Text>
-            <Text style={styles.signedInText}>Signed in as {user.email}</Text>
+    <SafeAreaView style={isSettings ? styles.authSafeArea : styles.safeArea}>
+      <StatusBar style={isSettings ? 'light' : 'dark'} />
+      {isSettings ? (
+        <SettingsScreen onDirtyChange={setSettingsDirty} user={user} />
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.topBar}>
+            <View>
+              <Text style={styles.eyebrow}>Today</Text>
+              <Text style={styles.title}>Silver Potato</Text>
+              <Text style={styles.signedInText}>Signed in as {user.email}</Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onLogout}
+              style={styles.logoutButton}
+            >
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            </Pressable>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            onPress={onLogout}
-            style={styles.logoutButton}
-          >
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </Pressable>
-        </View>
 
-        <View style={styles.heroPanel}>
-          <Text style={styles.panelKicker}>Daily focus</Text>
-          <Text style={styles.heroTitle}>Keep the important stuff moving.</Text>
-          <Pressable accessibilityRole="button" style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Add task</Text>
-          </Pressable>
-        </View>
+          <View style={styles.heroPanel}>
+            <Text style={styles.panelKicker}>Daily focus</Text>
+            <Text style={styles.heroTitle}>Keep the important stuff moving.</Text>
+            <Pressable accessibilityRole="button" style={styles.primaryButton}>
+              <Text style={styles.primaryButtonText}>Add task</Text>
+            </Pressable>
+          </View>
 
-        <View style={styles.statsGrid}>
-          {stats.map((stat) => (
-            <View key={stat.label} style={styles.statCard}>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-              <Text style={styles.statValue}>{stat.value}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.sectionHeading}>
-          <Text style={styles.sectionTitle}>Next up</Text>
-          <Pressable accessibilityRole="button" style={styles.secondaryButton}>
-            <Text style={styles.secondaryButtonText}>View all</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.taskList}>
-          {tasks.map((task) => (
-            <View key={task.title} style={styles.taskCard}>
-              <View
-                accessibilityElementsHidden
-                importantForAccessibility="no"
-                style={[styles.taskCheck, { backgroundColor: task.tone }]}
-              >
-                <Text style={styles.checkText}>OK</Text>
+          <View style={styles.statsGrid}>
+            {stats.map((stat) => (
+              <View key={stat.label} style={styles.statCard}>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+                <Text style={styles.statValue}>{stat.value}</Text>
               </View>
-              <View>
-                <Text style={styles.taskTitle}>{task.title}</Text>
-                <Text style={styles.taskTime}>{task.time}</Text>
+            ))}
+          </View>
+
+          <View style={styles.sectionHeading}>
+            <Text style={styles.sectionTitle}>Next up</Text>
+            <Pressable accessibilityRole="button" style={styles.secondaryButton}>
+              <Text style={styles.secondaryButtonText}>View all</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.taskList}>
+            {tasks.map((task) => (
+              <View key={task.title} style={styles.taskCard}>
+                <View
+                  accessibilityElementsHidden
+                  importantForAccessibility="no"
+                  style={[styles.taskCheck, { backgroundColor: task.tone }]}
+                >
+                  <Text style={styles.checkText}>OK</Text>
+                </View>
+                <View>
+                  <Text style={styles.taskTitle}>{task.title}</Text>
+                  <Text style={styles.taskTime}>{task.time}</Text>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+            ))}
+          </View>
+        </ScrollView>
+      )}
 
       <View style={styles.bottomTabs}>
-        {['Home', 'Plan', 'Settings'].map((tab, index) => (
+        {[
+          { id: 'home', label: 'Home' },
+          { id: 'plan', label: 'Plan' },
+          { id: 'settings', label: 'Settings' },
+        ].map((tab) => (
           <Pressable
             accessibilityRole="tab"
-            accessibilityState={{ selected: index === 0 }}
-            key={tab}
-            style={[styles.tab, index === 0 && styles.activeTab]}
+            accessibilityState={{ selected: activeTab === tab.id }}
+            key={tab.id}
+            onPress={() =>
+              handleTabPress(tab.id as 'home' | 'plan' | 'settings')
+            }
+            style={[styles.tab, activeTab === tab.id && styles.activeTab]}
           >
-            <Text style={[styles.tabText, index === 0 && styles.activeTabText]}>
-              {tab}
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab.id && styles.activeTabText,
+              ]}
+            >
+              {tab.label}
             </Text>
           </Pressable>
         ))}

@@ -5,8 +5,8 @@ An Expo Go + React Native + TypeScript mobile app starter on Expo SDK 54.
 ## Scripts
 
 - `npm run dev` starts Expo on your local network for Expo Go while skipping Expo dependency API checks.
-- `npm start` starts Expo for Expo Go.
-- `npm run start:lan` starts Expo on your local network.
+- `npm start` starts Expo for Expo Go while skipping Expo dependency API checks.
+- `npm run start:lan` starts Expo on your local network while skipping Expo dependency API checks.
 - `npm run start:lan:no-check` starts Expo on your local network without dependency API checks.
 - `npm run start:offline` starts Expo without Expo API checks.
 - `npm run start:tunnel` starts Expo through a tunnel when LAN is blocked.
