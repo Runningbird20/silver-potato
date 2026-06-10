@@ -8,13 +8,28 @@ export interface ExerciseSet {
 export interface Exercise {
   id: string;
   name: string;
+  notes?: string;
   sets: ExerciseSet[];
 }
 
 export interface WorkoutSession {
   id: string;
-  date: string; // YYYY-MM-DD
+  date: string;      // YYYY-MM-DD
+  name?: string;
   exercises: Exercise[];
+  startTime?: number; // epoch ms
+  endTime?: number;   // epoch ms
+}
+
+export interface RoutineExercise {
+  name: string;
+  plannedSets: number;
+}
+
+export interface Routine {
+  id: string;
+  name: string;
+  exercises: RoutineExercise[];
 }
 
 export interface PR {
@@ -22,28 +37,28 @@ export interface PR {
   exerciseName: string;
   weight: number;
   reps: number;
-  date: string; // YYYY-MM-DD
+  date: string;
 }
 
 export interface FoodItem {
   id: string;
   name: string;
   calories: number;
-  protein: number; // g
-  carbs: number;   // g
-  fat: number;     // g
+  protein: number;
+  carbs: number;
+  fat: number;
 }
 
 export interface Meal {
   id: string;
   name: string;
   time: string;
-  date: string; // YYYY-MM-DD
+  date: string;
   foods: FoodItem[];
 }
 
 export interface Measurements {
-  chest?: number;  // inches
+  chest?: number;
   waist?: number;
   arms?: number;
   quads?: number;
@@ -51,7 +66,7 @@ export interface Measurements {
 
 export interface BodyEntry {
   id: string;
-  date: string; // YYYY-MM-DD
-  weight: number; // lbs
+  date: string;
+  weight: number;
   measurements?: Measurements;
 }

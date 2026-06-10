@@ -1,8 +1,9 @@
+import { type ComponentProps } from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../src/theme';
 
-type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+type IoniconsName = ComponentProps<typeof Ionicons>['name'];
 
 interface TabConfig {
   name: string;
@@ -12,7 +13,7 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { name: 'index', title: 'Today', icon: 'today-outline', iconActive: 'today' },
+  { name: 'index', title: 'Schedule', icon: 'calendar-outline', iconActive: 'calendar' },
   { name: 'progress', title: 'Progress', icon: 'trophy-outline', iconActive: 'trophy' },
   { name: 'nutrition', title: 'Nutrition', icon: 'nutrition-outline', iconActive: 'nutrition' },
   { name: 'body', title: 'Body', icon: 'body-outline', iconActive: 'body' },
@@ -30,9 +31,9 @@ export default function TabsLayout() {
           borderTopColor: theme.border,
           borderTopWidth: 1,
         },
-        tabBarActiveTintColor: theme.accent,
-        tabBarInactiveTintColor: theme.textMuted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarActiveTintColor: theme.silver,
+        tabBarInactiveTintColor: theme.textTertiary,
+        tabBarLabelStyle: { fontSize: 9, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' },
       }}
     >
       {TABS.map((tab) => (

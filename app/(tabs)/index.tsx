@@ -1,158 +1,149 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
-  TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useWorkout } from '../../src/hooks/useWorkout';
-import { ExerciseCard } from '../../src/components/ExerciseCard';
+import { router } from 'expo-router';
+import { useActiveWorkout } from '../../src/context/WorkoutContext';
+import { ResumeBanner } from '../../src/components/ResumeBanner';
+import { Routine } from '../../src/types';
 import { theme } from '../../src/theme';
 
-export default function TodayScreen() {
-  const { session, addExercise, addSet, updateSet, completeSet, volume } =
-    useWorkout();
-  const [newExerciseName, setNewExerciseName] = useState('');
+function RoutineCard({ routine }: { routine: Routine }) {
+  const { startWorkout } = useActiveWorkout();
+  const exerciseList = routine.exercises.map((e) => e.name).join(', ');
 
-  const dateLabel = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  });
+  const handleStart = () => {
+    startWorkout(routine);
+    router.push('/active-workout');
+  };
 
-  const totalVolume = session.exercises.reduce(
-    (sum, ex) => sum + volume(ex.id),
-    0
+  return (
+    <View style={styles.card}>
+      <Text style={styles.routineName}>{routine.name}</Text>
+      <Text style={styles.exerciseList} numberOfLines={2}>
+        {exerciseList}
+      </Text>
+      <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
+        <Text style={styles.startBtnText}>Start Routine</Text>
+      </TouchableOpacity>
+    </View>
   );
-  const totalSets = session.exercises.reduce(
-    (sum, ex) => sum + ex.sets.length,
-    0
-  );
-  const completedSets = session.exercises.reduce(
-    (sum, ex) => sum + ex.sets.filter((s) => s.completed).length,
-    0
-  );
+}
 
-  const handleAddExercise = () => {
-    const trimmed = newExerciseName.trim();
-    if (!trimmed) return;
-    addExercise(trimmed);
-    setNewExerciseName('');
+export default function ScheduleScreen() {
+  const { routines, isActive, startWorkout } = useActiveWorkout();
+
+  const handleEmptyWorkout = () => {
+    startWorkout(null);
+    router.push('/active-workout');
   };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={90}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          isActive && { paddingBottom: 72 },
+        ]}
       >
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
+        <Text style={styles.heading}>Workout</Text>
+
+        {/* Empty workout CTA */}
+        <TouchableOpacity
+          style={styles.emptyBtn}
+          onPress={handleEmptyWorkout}
+          activeOpacity={0.7}
         >
-          <Text style={styles.dateLabel}>{dateLabel}</Text>
-          <Text style={styles.heading}>Today's Workout</Text>
+          <Text style={styles.emptyBtnText}>+ Start Empty Workout</Text>
+        </TouchableOpacity>
 
-          {session.exercises.length > 0 && (
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryChip}>
-                {session.exercises.length} exercises
-              </Text>
-              <Text style={styles.summaryChip}>
-                {completedSets}/{totalSets} sets done
-              </Text>
-              <Text style={styles.summaryChip}>{totalVolume} lbs total</Text>
-            </View>
-          )}
+        {/* Routines */}
+        <Text style={styles.sectionLabel}>MY ROUTINES</Text>
 
-          {session.exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              volume={volume(exercise.id)}
-              onAddSet={() => addSet(exercise.id)}
-              onUpdateSet={(setId, patch) =>
-                updateSet(exercise.id, setId, patch)
-              }
-              onCompleteSet={(setId) => completeSet(exercise.id, setId)}
-            />
-          ))}
+        {routines.map((r) => (
+          <RoutineCard key={r.id} routine={r} />
+        ))}
+      </ScrollView>
 
-          <View style={styles.addRow}>
-            <TextInput
-              style={styles.addInput}
-              value={newExerciseName}
-              onChangeText={setNewExerciseName}
-              placeholder="Add exercise (e.g. Deadlift)..."
-              placeholderTextColor={theme.textMuted}
-              onSubmitEditing={handleAddExercise}
-              returnKeyType="done"
-            />
-            <TouchableOpacity
-              onPress={handleAddExercise}
-              style={styles.addBtn}
-            >
-              <Text style={styles.addBtnText}>Add</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      {isActive && <ResumeBanner />}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: theme.background },
-  flex: { flex: 1 },
   scroll: { flex: 1 },
-  content: { padding: 16, paddingBottom: 40 },
-  dateLabel: { color: theme.textMuted, fontSize: 13, marginBottom: 2 },
+  content: { paddingHorizontal: 16, paddingBottom: 32, paddingTop: 8 },
+
   heading: {
     color: theme.text,
-    fontSize: 26,
-    fontWeight: '700',
-    marginBottom: 12,
+    fontSize: 22,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+    marginBottom: 16,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+
+  // Empty workout button
+  emptyBtn: {
+    borderWidth: 1,
+    borderColor: theme.border,
+    borderRadius: 5,
+    paddingVertical: 13,
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  emptyBtnText: {
+    color: theme.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+
+  sectionLabel: {
+    color: theme.textTertiary,
+    fontSize: 10,
+    fontWeight: '500',
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
+
+  // Routine card
+  card: {
+    backgroundColor: theme.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.border,
+    padding: 14,
+    marginBottom: 10,
+  },
+  routineName: {
+    color: theme.text,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  exerciseList: {
+    color: theme.textSecondary,
+    fontSize: 13,
+    lineHeight: 18,
     marginBottom: 14,
   },
-  summaryChip: {
-    color: theme.textMuted,
-    fontSize: 12,
-    backgroundColor: theme.surface,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+  startBtn: {
+    backgroundColor: theme.surface2,
+    borderRadius: 5,
     borderWidth: 1,
     borderColor: theme.border,
+    paddingVertical: 11,
+    alignItems: 'center',
   },
-  addRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
-  addInput: {
-    flex: 1,
-    backgroundColor: theme.surface,
-    color: theme.text,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: theme.border,
-    fontSize: 15,
+  startBtnText: {
+    color: theme.silverBright,
+    fontSize: 14,
+    fontWeight: '600',
   },
-  addBtn: {
-    backgroundColor: theme.accent,
-    borderRadius: 10,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-  },
-  addBtnText: { color: '#000', fontWeight: '700', fontSize: 15 },
 });
